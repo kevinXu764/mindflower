@@ -1,0 +1,3181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>心花 · 我的心境日历</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-color: #F5F3ED;
+      --text-color: #4A4A4A;
+      --text-heading: #3D3D3D;
+      --text-muted: #888;
+      --card-bg: #fff;
+      --card-border: #F0EBE3;
+      --header-bg: rgba(255, 251, 245, 0.92);
+      --header-border: rgba(0,0,0,0.04);
+      --modal-bg: #FFFBF5;
+      --input-bg: #fff;
+      --input-border: #E8E4DC;
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 10px;
+      --radius-xl: 12px;
+      --radius-2xl: 16px;
+      --radius-full: 9999px;
+      --border-width: 1px;
+      --shadow-xs: 0 1px 4px rgba(0,0,0,0.05);
+      --shadow-sm: 0 2px 10px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(61,61,61,0.18);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+      --shadow-subtle: 0 2px 10px rgba(0,0,0,0.06);
+      --hint-bg: rgba(255,255,255,0.9);
+    }
+
+    body.mode-night,
+    body.mode-rain {
+      --bg-color: #1A1A1F;
+      --text-color: #E8E6E1;
+      --text-heading: #F5F3ED;
+      --text-muted: #A0A0A0;
+      --card-bg: #25252B;
+      --card-border: rgba(255,255,255,0.08);
+      --header-bg: rgba(30, 30, 36, 0.92);
+      --header-border: rgba(255,255,255,0.06);
+      --modal-bg: #25252B;
+      --input-bg: #2E2E35;
+      --input-border: rgba(255,255,255,0.12);
+      --shadow-sm: 0 2px 10px rgba(0,0,0,0.25);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-subtle: 0 2px 10px rgba(0,0,0,0.2);
+      --hint-bg: rgba(40, 40, 46, 0.9);
+    }
+
+    body {
+      overflow: hidden;
+      background: var(--bg-color);
+      font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-color);
+      transition: background 0.5s ease;
+    }
+
+    /* 顶部导航 */
+    #header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      background: var(--header-bg);
+      backdrop-filter: blur(10px);
+      border-bottom: var(--border-width) solid var(--header-border);
+      z-index: 10;
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    #header .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-heading);
+      text-decoration: none;
+    }
+
+    #header .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #A8C5E8 0%, #C6A8E6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #header .brand-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    #user-login {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 5px 12px 5px 5px;
+      border-radius: var(--radius-full);
+      background: var(--card-bg);
+      border: var(--border-width) solid var(--card-border);
+      box-shadow: var(--shadow-sm);
+      transition: background 0.5s ease, border-color 0.5s ease, transform 0.2s;
+    }
+    #user-login:hover { transform: translateY(-1px); }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, #A8C5E8 0%, #C6A8E6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-heading);
+      white-space: nowrap;
+    }
+
+    #month-control {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--card-bg);
+      padding: 6px 8px;
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-subtle);
+      transition: background 0.5s ease;
+    }
+
+    #month-control button {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    #month-control button:hover {
+      background: rgba(128,128,128,0.12);
+      color: var(--text-heading);
+    }
+
+    #month-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-heading);
+      min-width: 110px;
+      text-align: center;
+    }
+
+    #actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: var(--radius-xl);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.5s ease, color 0.5s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary { background: #3D3D3D; color: #fff; box-shadow: var(--shadow-md); }
+    .btn-secondary { background: var(--card-bg); color: var(--text-heading); box-shadow: var(--shadow-subtle); }
+    .btn-danger { background: #E53935; color: #fff; box-shadow: var(--shadow-md); }
+
+    body.mode-night .btn-primary,
+    body.mode-rain .btn-primary { background: #F5F3ED; color: #1A1A1F; box-shadow: var(--shadow-md); }
+    body.mode-night .btn-secondary,
+    body.mode-rain .btn-secondary { background: var(--card-bg); color: var(--text-heading); box-shadow: var(--shadow-subtle); }
+    body.mode-night .btn-danger,
+    body.mode-rain .btn-danger { background: #EF5350; color: #fff; box-shadow: var(--shadow-md); }
+
+    #clear-detail.btn-danger {
+      background: transparent;
+      color: #E53935;
+      border: var(--border-width) solid #E53935;
+      box-shadow: none;
+    }
+    body.mode-night #clear-detail.btn-danger,
+    body.mode-rain #clear-detail.btn-danger {
+      background: transparent;
+      color: #EF5350;
+      border-color: #EF5350;
+    }
+
+    /* 提示 */
+    #hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 18px;
+      background: var(--hint-bg);
+      border-radius: var(--radius-xl);
+      font-size: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+      z-index: 9;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    /* 弹窗 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(61, 61, 61, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+
+    .modal-wrap {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 520px;
+    }
+
+    .modal {
+      background: var(--modal-bg);
+      border-radius: var(--radius-2xl);
+      width: 100%;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(20px) scale(0.96);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.5s ease;
+      max-height: 86vh;
+      overflow-y: auto;
+      color: var(--text-color);
+    }
+
+    .modal-backdrop.active .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-wrap.modal-large { max-width: 760px; }
+    .modal-wrap.modal-large .modal { max-width: 760px; }
+
+    .modal-wrap.modal-medium { max-width: 620px; }
+    .modal-wrap.modal-medium .modal { max-width: 620px; }
+
+    .modal-bulletin {
+      background: #E8DCC8;
+      border: 8px solid #C9B89A;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.08), var(--shadow-lg);
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    body.mode-night .modal-bulletin,
+    body.mode-rain .modal-bulletin {
+      background: #3A3428;
+      border-color: #5A5040;
+    }
+
+    .bulletin-subtitle {
+      font-size: 14px;
+      color: #6B5E4E;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    body.mode-night .bulletin-subtitle,
+    body.mode-rain .bulletin-subtitle { color: #B0A080; }
+
+    .bulletin-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    .bulletin-card {
+      position: relative;
+      background: #FFFBF5;
+      border-radius: var(--radius-xs);
+      padding: 28px 14px 18px;
+      min-height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 2px 3px 8px rgba(0,0,0,0.18);
+      border: var(--border-width) solid rgba(0,0,0,0.06);
+      transition: transform 0.2s;
+      cursor: pointer;
+      transform: rotate(var(--tilt, 0deg));
+    }
+
+    body.mode-night .bulletin-card,
+    body.mode-rain .bulletin-card {
+      background: #4A4438;
+      border-color: rgba(255,255,255,0.08);
+      box-shadow: 2px 3px 8px rgba(0,0,0,0.35);
+    }
+
+    .bulletin-card:hover { transform: rotate(var(--tilt, 0deg)) scale(1.03); }
+
+    .bulletin-card-text {
+      font-size: 14px;
+      color: #3D3D3D;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    body.mode-night .bulletin-card-text,
+    body.mode-rain .bulletin-card-text { color: #F5F0E6; }
+
+    .bulletin-pin {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: var(--radius-full);
+      background: radial-gradient(circle at 30% 30%, #FF6B6B, #C92A2A);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .bulletin-pin::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px;
+      height: 4px;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.5);
+    }
+
+    .bulletin-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .modal h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 20px;
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border: var(--border-width) solid var(--input-border);
+      border-radius: var(--radius-md);
+      background: var(--input-bg);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text-heading);
+      outline: none;
+      transition: border-color 0.2s, background 0.5s ease, color 0.5s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { border-color: #A8C5E8; }
+
+    body.mode-night .form-group input:focus,
+    body.mode-night .form-group textarea:focus,
+    body.mode-night .form-group select:focus,
+    body.mode-rain .form-group input:focus,
+    body.mode-rain .form-group textarea:focus,
+    body.mode-rain .form-group select:focus { border-color: #7A9BC4; }
+
+    .inspiration-task-display {
+      padding: 12px 14px;
+      background: var(--input-bg);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      color: var(--text-heading);
+      font-weight: 600;
+      border: var(--border-width) solid var(--input-border);
+      transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+    }
+
+    .emotion-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .emotion-option {
+      flex: 1;
+      min-width: 56px;
+      padding: 12px 8px;
+      border: 2px solid var(--input-border);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--input-bg);
+    }
+
+    .emotion-option:hover { border-color: #C6A8E6; }
+    .emotion-option.selected {
+      border-color: #C6A8E6;
+      background: rgba(198, 168, 230, 0.15);
+    }
+
+    .emotion-option .emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+    .emotion-option .score { font-size: 12px; color: var(--text-muted); }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .modal-actions .btn { padding: 10px 22px; }
+
+    .record-list {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
+
+    .record-item {
+      background: var(--input-bg);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      border: var(--border-width) solid var(--card-border);
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    .record-item strong { color: var(--text-heading); }
+    .record-item small { color: var(--text-muted); display: block; margin-top: 4px; }
+
+    .report-chart {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      height: 160px;
+      padding: 16px;
+      background: var(--input-bg);
+      border-radius: var(--radius-lg);
+      margin: 16px 0;
+      border: var(--border-width) solid var(--card-border);
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    .bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .bar {
+      width: 100%;
+      max-width: 32px;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      background: linear-gradient(180deg, #A8C5E8 0%, #C6A8E6 100%);
+      transition: height 0.6s ease;
+    }
+
+    .bar-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .summary-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-color);
+      background: var(--input-bg);
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      border: var(--border-width) solid var(--card-border);
+      transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+    }
+
+    .close-x {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      padding: 12px 24px;
+      background: #3D3D3D;
+      color: #fff;
+      border-radius: var(--radius-2xl);
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      z-index: 30;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* 右侧面板 */
+    #right-panel {
+      position: absolute;
+      top: 84px;
+      right: 20px;
+      width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 9;
+    }
+
+    /* 氛围切换栏 */
+    #atmosphere-switcher {
+      position: static;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .atmosphere-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding-left: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    /* 花园氛围说明卡片 */
+    #atmosphere-intro {
+      width: 100%;
+      background: var(--card-bg);
+      border: var(--border-width) solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    .atmosphere-intro-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 6px;
+    }
+
+    .atmosphere-intro-text {
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .atmosphere-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .atmosphere-btn {
+      flex: 1;
+      padding: 7px 0;
+      border: var(--border-width) solid var(--card-border);
+      border-radius: var(--radius-lg);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .atmosphere-btn:hover {
+      color: var(--text-heading);
+      transform: translateY(-1px);
+    }
+
+    .atmosphere-btn.active {
+      background: #3D3D3D;
+      color: #fff;
+      border-color: #3D3D3D;
+    }
+
+    body.mode-night .atmosphere-btn.active,
+    body.mode-rain .atmosphere-btn.active {
+      background: #F5F3ED;
+      color: #1A1A1F;
+      border-color: #F5F3ED;
+    }
+
+    /* 雨幕画布 */
+    #rain-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    body.mode-rain #rain-canvas { opacity: 1; }
+
+    /* 右上角数据便当 */
+    #stats-bento {
+      position: static;
+      width: 100%;
+      z-index: 9;
+    }
+
+    .stats-bento-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-right: 2px;
+      letter-spacing: 0.5px;
+      text-align: right;
+    }
+
+    .stats-bento-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stats-bento-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 14px 12px;
+      border: var(--border-width) solid var(--card-border);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, background 0.5s ease, border-color 0.5s ease;
+    }
+
+    .stats-bento-card:hover { transform: translateY(-2px); }
+
+    .stats-bento-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+
+    .stats-bento-card .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .stats-bento-card.accent-1 { background: linear-gradient(135deg, #FFF9E6 0%, #FFFBF5 100%); }
+    .stats-bento-card.accent-2 { background: linear-gradient(135deg, #F0F7FF 0%, #FFFBF5 100%); }
+    .stats-bento-card.accent-3 { background: linear-gradient(135deg, #F5FFF5 0%, #FFFBF5 100%); }
+    .stats-bento-card.accent-4 { background: linear-gradient(135deg, #FFF5FA 0%, #FFFBF5 100%); }
+
+    body.mode-night .stats-bento-card.accent-1,
+    body.mode-rain .stats-bento-card.accent-1 { background: linear-gradient(135deg, #3A3528 0%, #25252B 100%); }
+    body.mode-night .stats-bento-card.accent-2,
+    body.mode-rain .stats-bento-card.accent-2 { background: linear-gradient(135deg, #283040 0%, #25252B 100%); }
+    body.mode-night .stats-bento-card.accent-3,
+    body.mode-rain .stats-bento-card.accent-3 { background: linear-gradient(135deg, #283428 0%, #25252B 100%); }
+    body.mode-night .stats-bento-card.accent-4,
+    body.mode-rain .stats-bento-card.accent-4 { background: linear-gradient(135deg, #3A2834 0%, #25252B 100%); }
+
+    /* 数据便当下方操作栏 */
+    #bento-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    #bento-actions .btn {
+      flex: 1;
+      justify-content: center;
+      padding: 9px 0;
+    }
+
+    /* 情绪种子说明卡片 */
+    #seed-intro {
+      position: absolute;
+      top: 84px;
+      left: 20px;
+      width: 280px;
+      background: var(--card-bg);
+      border: var(--border-width) solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      box-shadow: var(--shadow-sm);
+      z-index: 9;
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+
+    .seed-intro-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 6px;
+    }
+
+    .seed-intro-text {
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* 种子列表上方操作栏 */
+    #seed-actions {
+      position: absolute;
+      top: 205px;
+      left: 20px;
+      width: 280px;
+      display: flex;
+      gap: 8px;
+      z-index: 9;
+    }
+
+    #seed-actions .btn {
+      flex: 1;
+      justify-content: center;
+      padding: 9px 0;
+    }
+
+    /* 生长中种子列表 */
+    #seed-list {
+      position: absolute;
+      top: 253px;
+      left: 20px;
+      width: 280px;
+      z-index: 9;
+    }
+
+    .seed-list-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-left: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .seed-card {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border: var(--border-width) solid var(--card-border);
+      box-shadow: var(--shadow-sm);
+      transition: background 0.5s ease, border-color 0.5s ease;
+      overflow: hidden;
+    }
+
+    /* 卡片内除操作块外的元素不参与点击，避免遮挡“前往”按钮 */
+    .seed-progress,
+    .seed-card-date,
+    .seed-card-title,
+    .seed-card-growth {
+      pointer-events: none;
+    }
+
+    .seed-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--growth-progress, 0%);
+      background: rgba(76, 175, 80, 0.18);
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .seed-card-date {
+      position: relative;
+      z-index: 1;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .seed-card-title {
+      position: relative;
+      z-index: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-bottom: 4px;
+      padding-right: 56px;
+      line-height: 1.35;
+    }
+
+    .seed-card-growth {
+      position: relative;
+      z-index: 1;
+      font-size: 11px;
+      color: var(--text-color);
+    }
+
+    .seed-card-actions {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 1;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      pointer-events: auto;
+    }
+
+    .btn-goto {
+      padding: 4px 10px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: #3D3D3D;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.5s ease, color 0.5s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .seed-card-actions:hover .btn-goto,
+    .btn-goto:hover { transform: translateY(-1px); }
+
+    body.mode-night .btn-goto,
+    body.mode-rain .btn-goto {
+      background: #F5F3ED;
+      color: #1A1A1F;
+    }
+
+    .seed-empty {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    .seed-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .seed-pagination button {
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--card-bg);
+      color: var(--text-heading);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-xs);
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    .seed-pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .seed-pagination .page-info {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="header">
+    <a href="index.html" class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <g style="fill:#ffffff">
+            <ellipse cx="12" cy="5.2" rx="2.2" ry="3.9"/>
+            <ellipse cx="12" cy="5.2" rx="2.2" ry="3.9" transform="rotate(60 12 12)"/>
+            <ellipse cx="12" cy="5.2" rx="2.2" ry="3.9" transform="rotate(120 12 12)"/>
+            <ellipse cx="12" cy="5.2" rx="2.2" ry="3.9" transform="rotate(180 12 12)"/>
+            <ellipse cx="12" cy="5.2" rx="2.2" ry="3.9" transform="rotate(240 12 12)"/>
+            <ellipse cx="12" cy="5.2" rx="2.2" ry="3.9" transform="rotate(300 12 12)"/>
+          </g>
+          <circle cx="12" cy="12" r="3" style="fill:#ffdf5e"/>
+        </svg>
+      </div>
+      心花
+    </a>
+
+    <div id="user-login">
+      <div class="user-avatar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <span class="user-text">点击登录</span>
+    </div>
+
+  </div>
+
+  <div id="hint">点击日期查看详情 · 拖动旋转 · 滚轮缩放</div>
+
+  <!-- 右侧面板 -->
+  <div id="right-panel">
+    <!-- 月份切换 -->
+    <div id="month-control">
+      <button id="prev-month" aria-label="上个月">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span id="month-label">2026年7月</span>
+      <button id="next-month" aria-label="下个月">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <!-- 右上角数据便当 -->
+    <div id="stats-bento">
+      <div class="stats-bento-header" style="display:none;">花园概览</div>
+      <div class="stats-bento-grid" id="stats-bento-grid"></div>
+    </div>
+
+    <!-- 花园氛围说明卡片 -->
+    <div id="atmosphere-intro">
+      <div class="atmosphere-intro-title">花园氛围</div>
+      <div class="atmosphere-intro-text">切换不同氛围，聆听对应的白噪声，让花园进入你想要的心境。</div>
+    </div>
+
+    <!-- 氛围切换栏 -->
+    <div id="atmosphere-switcher">
+      <div class="atmosphere-header" style="display:none;">花园氛围</div>
+      <div class="atmosphere-buttons">
+        <button class="atmosphere-btn active" data-mode="day">白天</button>
+        <button class="atmosphere-btn" data-mode="rain">雨天</button>
+        <button class="atmosphere-btn" data-mode="night">夜晚</button>
+      </div>
+    </div>
+
+    <!-- 数据便当下方操作栏 -->
+    <div id="bento-actions">
+      <button class="btn btn-secondary" id="btn-report"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>情绪周报</button>
+      <button class="btn btn-primary" id="btn-emotion"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>记录情绪</button>
+    </div>
+  </div>
+
+  <!-- 氛围效果层 -->
+  <canvas id="rain-canvas"></canvas>
+
+  <!-- 情绪种子说明卡片 -->
+  <div id="seed-intro">
+    <div class="seed-intro-title">情绪种子</div>
+    <div class="seed-intro-text">种子是你为未来种下的期待。种下后，它会随着每次行动记录慢慢成长；当成长值积满时，种子就会开花，成为花园里的一朵纪念。</div>
+  </div>
+
+  <!-- 种子列表上方操作栏 -->
+  <div id="seed-actions">
+    <button class="btn btn-secondary" id="btn-random"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2C8 2 5 5 5 9c0 2.5 1.5 4.5 3 6v2h8v-2c1.5-1.5 3-3.5 3-6 0-4-3-7-7-7z"/></svg>来点灵感</button>
+    <button class="btn btn-secondary" id="btn-plan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"/><path d="M12 11c-2-1-4-3-4-7 0 0 3 2 4 7 1-5 4-7 4-7 0 4-2 6-4 7z"/></svg>种颗种子</button>
+  </div>
+
+  <!-- 生长中种子列表 -->
+  <div id="seed-list">
+    <div class="seed-list-header" style="display:none;">生长中的种子</div>
+    <div id="seed-list-content"></div>
+    <div class="seed-pagination" id="seed-pagination"></div>
+  </div>
+
+  <!-- 记录情绪弹窗 -->
+  <div class="modal-backdrop" id="modal-emotion">
+    <div class="modal-wrap">
+      <div class="modal">
+        <h2>记录今日情绪</h2>
+        <div class="form-group">
+          <label>日期</label>
+          <input type="date" id="emotion-date">
+        </div>
+        <div class="form-group">
+          <label>今天感觉如何？</label>
+          <div class="emotion-options" id="emotion-options">
+            <div class="emotion-option" data-score="-1"><span class="emoji">😔</span><span class="score">低落</span></div>
+            <div class="emotion-option" data-score="1"><span class="emoji">😕</span><span class="score">一般</span></div>
+            <div class="emotion-option" data-score="2"><span class="emoji">🙂</span><span class="score">平和</span></div>
+            <div class="emotion-option" data-score="3"><span class="emoji">😊</span><span class="score">开心</span></div>
+            <div class="emotion-option" data-score="4"><span class="emoji">🤩</span><span class="score">很棒</span></div>
+          </div>
+          <input type="hidden" id="emotion-score" value="2">
+        </div>
+        <div class="form-group">
+          <label>备注（选填）</label>
+          <textarea id="emotion-note" rows="2" placeholder="写下今天让你印象深刻的事..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" data-close="modal-emotion">取消</button>
+          <button class="btn btn-primary" id="save-emotion">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 种颗种子弹窗 -->
+  <div class="modal-backdrop" id="modal-plan">
+    <div class="modal-wrap modal-medium">
+      <div class="modal">
+        <h2>种下一颗期待</h2>
+        <div class="form-group">
+          <label>日期</label>
+          <input type="date" id="plan-date">
+        </div>
+        <div class="form-group">
+          <label>计划内容</label>
+          <input type="text" id="plan-title" placeholder="例如：周末去公园野餐">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" data-close="modal-plan">取消</button>
+          <button class="btn btn-primary" id="save-plan">种下种子</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日期详情弹窗 -->
+  <div class="modal-backdrop" id="modal-detail">
+    <div class="modal-wrap">
+      <div class="modal">
+        <h2 id="detail-title">7月10日</h2>
+        <div id="detail-content"></div>
+        <div id="plan-actions" style="display:none; margin-top:16px;">
+          <div class="form-group">
+            <label>添加实施记录</label>
+            <input type="text" id="record-input" placeholder="今天完成了什么？">
+          </div>
+          <button class="btn btn-primary" id="add-record" style="width:100%;">记录成长 +1</button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-danger" id="clear-detail" style="display:none;">消除情绪</button>
+          <button class="btn btn-secondary" data-close="modal-detail">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 来点灵感弹窗 -->
+  <div class="modal-backdrop" id="modal-random">
+    <div class="modal-wrap modal-large">
+      <div class="modal modal-bulletin">
+        <h2>来点灵感</h2>
+        <p class="bulletin-subtitle">从公告栏上摘一张小目标，选一个未来的日子种下它。</p>
+        <div id="bulletin-board" class="bulletin-board"></div>
+        <div class="bulletin-actions">
+          <button class="btn btn-secondary" data-close="modal-random">关闭</button>
+          <button class="btn btn-primary" id="draw-task">换一批</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 灵感确认弹窗 -->
+  <div class="modal-backdrop" id="modal-inspiration-confirm">
+    <div class="modal-wrap modal-medium">
+      <div class="modal">
+        <h2>种下一颗灵感</h2>
+        <div class="form-group">
+          <label>选中的目标</label>
+          <div id="inspiration-task-title" class="inspiration-task-display"></div>
+        </div>
+        <div class="form-group">
+          <label>你想在哪一天完成它？</label>
+          <input type="date" id="inspiration-date">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" data-close="modal-inspiration-confirm">取消</button>
+          <button class="btn btn-primary" id="save-inspiration">种下种子</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 情绪周报弹窗 -->
+  <div class="modal-backdrop" id="modal-report">
+    <div class="modal-wrap">
+      <div class="modal">
+        <h2>过去一周情绪周报</h2>
+        <div class="report-chart" id="report-chart"></div>
+        <div class="summary-text" id="report-summary"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" data-close="modal-report">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./plant-config.js"></script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ============ 数据层 ============
+    const PLAN_THRESHOLD = 3;
+    const today = new Date();
+    const todayKey = formatDate(today);
+
+    let currentYear = today.getFullYear();
+    let currentMonth = today.getMonth();
+    let selectedDateKey = null;
+    let seedListPage = 1;
+    const SEEDS_PER_PAGE = 4;
+
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    // SQLite + IndexedDB 持久化（失败时回退到内存）
+    const DB_NAME = 'emotion_garden_db';
+    const STORE_NAME = 'db';
+    const DB_KEY = 'garden.sqlite';
+
+    let sqlDb = null;
+    let memoryData = {};
+    let persistenceAvailable = false;
+
+    async function openIndexedDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME);
+          }
+        };
+        request.onsuccess = e => resolve(e.target.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function loadDbFromIndexedDB() {
+      const db = await openIndexedDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const getReq = store.get(DB_KEY);
+        getReq.onsuccess = () => resolve(getReq.result);
+        getReq.onerror = () => reject(getReq.error);
+      });
+    }
+
+    async function saveDbToIndexedDB(data) {
+      const db = await openIndexedDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const putReq = store.put(data, DB_KEY);
+        putReq.onsuccess = () => resolve();
+        putReq.onerror = () => reject(putReq.error);
+      });
+    }
+
+    function createSchema(db) {
+      db.run(`
+        CREATE TABLE IF NOT EXISTS emotions (
+          date TEXT PRIMARY KEY,
+          score INTEGER NOT NULL,
+          note TEXT
+        );
+        CREATE TABLE IF NOT EXISTS plans (
+          date TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          growth INTEGER NOT NULL DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS plan_records (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          plan_date TEXT NOT NULL,
+          record TEXT NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+    }
+
+    function seedSampleData(db) {
+      const emotions = [
+        // July 2026
+        ['2026-07-04', 3, '工作有条不紊'],
+        ['2026-07-05', 4, '和朋友吃了好吃的'],
+        ['2026-07-06', -1, '有点累，晚上早点休息'],
+        ['2026-07-07', 1, '项目上线后反而有点空落落'],
+        ['2026-07-08', 2, '平淡的一天'],
+        ['2026-07-09', 3, '看了一部好电影'],
+        ['2026-07-10', 4, '今天状态不错'],
+        // May 2026
+        ['2026-05-03', -1, '连续的阴雨天，整个人提不起劲'],
+        ['2026-05-08', 4, '读完了一本小说，很有成就感'],
+        ['2026-05-12', 1, '新的一周开始，还没进入状态'],
+        ['2026-05-18', 2, '工作压力有点大，但还算可控'],
+        ['2026-05-24', 3, '和朋友聚会，聊了很多'],
+        ['2026-05-30', -1, '五月最后一天，有点怅然若失'],
+        // June 2026
+        ['2026-06-03', 2, '初夏的微风很舒服'],
+        ['2026-06-10', 3, '完成了一项重要任务'],
+        ['2026-06-15', -1, '有些焦虑，晚上没睡好'],
+        ['2026-06-21', 4, '父亲节，和家人一起吃饭'],
+        ['2026-06-28', 1, '六月即将结束，还没准备好']
+      ];
+
+      const emotionStmt = db.prepare('INSERT INTO emotions (date, score, note) VALUES (?, ?, ?)');
+      emotions.forEach(([date, score, note]) => emotionStmt.run([date, score, note]));
+      emotionStmt.free();
+
+      const plans = [
+        { date: '2026-05-08', title: '读完一本小说', growth: 3, records: ['借了书', '读到第三章', '读完啦'] },
+        { date: '2026-05-20', title: '每天冥想 10 分钟', growth: 1, records: ['尝试了一天'] },
+        { date: '2026-06-05', title: '学会一首吉他曲', growth: 2, records: ['练习和弦', '能弹前奏了'] },
+        { date: '2026-06-18', title: '整理相册', growth: 0, records: [] },
+        { date: '2026-07-13', title: '周末去爬山', growth: 1, records: ['查好了路线'] },
+        { date: '2026-07-15', title: '读完《情绪急救》', growth: 2, records: ['读完第一章'] },
+        { date: '2026-07-17', title: '每天散步 20 分钟', growth: 3, records: ['周一完成', '周二完成', '周三完成'] },
+        { date: '2026-07-22', title: '学习一道新菜', growth: 0, records: [] }
+      ];
+
+      const planStmt = db.prepare('INSERT INTO plans (date, title, growth) VALUES (?, ?, ?)');
+      const recordStmt = db.prepare('INSERT INTO plan_records (plan_date, record) VALUES (?, ?)');
+      plans.forEach(p => {
+        planStmt.run([p.date, p.title, p.growth]);
+        p.records.forEach(r => recordStmt.run([p.date, r]));
+      });
+      planStmt.free();
+      recordStmt.free();
+    }
+
+    function loadSqlJs() {
+      return new Promise((resolve, reject) => {
+        if (window.initSqlJs) {
+          window.initSqlJs({
+            locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/${file}`
+          }).then(resolve).catch(reject);
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js';
+        script.async = true;
+        script.onload = () => {
+          window.initSqlJs({
+            locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/${file}`
+          }).then(resolve).catch(reject);
+        };
+        script.onerror = () => reject(new Error('Failed to load sql.js script'));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function initPersistence() {
+      try {
+        const SQL = await loadSqlJs();
+
+        const saved = await loadDbFromIndexedDB();
+        if (saved) {
+          sqlDb = new SQL.Database(new Uint8Array(saved));
+        } else {
+          sqlDb = new SQL.Database();
+          createSchema(sqlDb);
+          seedSampleData(sqlDb);
+          await saveDbToIndexedDB(sqlDb.export());
+        }
+        persistenceAvailable = true;
+      } catch (e) {
+        console.warn('SQLite 持久化初始化失败，使用内存模式：', e);
+        sqlDb = null;
+        persistenceAvailable = false;
+        memoryData = generateMemorySampleData();
+      }
+    }
+
+    function generateMemorySampleData() {
+      const data = {};
+      const emotions = [
+        ['2026-07-04', 3, '工作有条不紊'],
+        ['2026-07-05', 4, '和朋友吃了好吃的'],
+        ['2026-07-06', -1, '有点累，晚上早点休息'],
+        ['2026-07-07', 1, '项目上线后反而有点空落落'],
+        ['2026-07-08', 2, '平淡的一天'],
+        ['2026-07-09', 3, '看了一部好电影'],
+        ['2026-07-10', 4, '今天状态不错'],
+        ['2026-05-03', -1, '连续的阴雨天，整个人提不起劲'],
+        ['2026-05-08', 4, '读完了一本小说，很有成就感'],
+        ['2026-05-12', 1, '新的一周开始，还没进入状态'],
+        ['2026-05-18', 2, '工作压力有点大，但还算可控'],
+        ['2026-05-24', 3, '和朋友聚会，聊了很多'],
+        ['2026-05-30', -1, '五月最后一天，有点怅然若失'],
+        ['2026-06-03', 2, '初夏的微风很舒服'],
+        ['2026-06-10', 3, '完成了一项重要任务'],
+        ['2026-06-15', -1, '有些焦虑，晚上没睡好'],
+        ['2026-06-21', 4, '父亲节，和家人一起吃饭'],
+        ['2026-06-28', 1, '六月即将结束，还没准备好']
+      ];
+      emotions.forEach(([date, score, note]) => {
+        data[date] = { emotion: score, note };
+      });
+
+      const plans = [
+        { date: '2026-05-08', title: '读完一本小说', growth: 3, records: ['借了书', '读到第三章', '读完啦'] },
+        { date: '2026-05-20', title: '每天冥想 10 分钟', growth: 1, records: ['尝试了一天'] },
+        { date: '2026-06-05', title: '学会一首吉他曲', growth: 2, records: ['练习和弦', '能弹前奏了'] },
+        { date: '2026-06-18', title: '整理相册', growth: 0, records: [] },
+        { date: '2026-07-13', title: '周末去爬山', growth: 1, records: ['查好了路线'] },
+        { date: '2026-07-15', title: '读完《情绪急救》', growth: 2, records: ['读完第一章'] },
+        { date: '2026-07-17', title: '每天散步 20 分钟', growth: 3, records: ['周一完成', '周二完成', '周三完成'] },
+        { date: '2026-07-22', title: '学习一道新菜', growth: 0, records: [] }
+      ];
+      plans.forEach(p => {
+        data[p.date] = data[p.date] || {};
+        data[p.date].plan = { title: p.title, growth: p.growth, records: p.records };
+      });
+
+      return data;
+    }
+
+    function persist() {
+      if (persistenceAvailable && sqlDb) {
+        saveDbToIndexedDB(sqlDb.export()).catch(e => console.warn('持久化保存失败：', e));
+      }
+    }
+
+    function getDateData(key) {
+      if (persistenceAvailable && sqlDb) {
+        const result = {};
+
+        const emotionStmt = sqlDb.prepare('SELECT score, note FROM emotions WHERE date = ?');
+        emotionStmt.bind([key]);
+        if (emotionStmt.step()) {
+          const row = emotionStmt.getAsObject();
+          result.emotion = row.score;
+          result.note = row.note;
+        }
+        emotionStmt.free();
+
+        const planStmt = sqlDb.prepare('SELECT title, growth FROM plans WHERE date = ?');
+        planStmt.bind([key]);
+        if (planStmt.step()) {
+          const row = planStmt.getAsObject();
+          const records = [];
+          const recStmt = sqlDb.prepare('SELECT record FROM plan_records WHERE plan_date = ? ORDER BY created_at');
+          recStmt.bind([key]);
+          while (recStmt.step()) {
+            records.push(recStmt.getAsObject().record);
+          }
+          recStmt.free();
+          result.plan = { title: row.title, growth: row.growth, records };
+        }
+        planStmt.free();
+
+        return result;
+      }
+      return memoryData[key] || {};
+    }
+
+    function getMonthData(year, month) {
+      const start = formatDate(new Date(year, month, 1));
+      const end = formatDate(new Date(year, month + 1, 0));
+      const data = {};
+
+      if (persistenceAvailable && sqlDb) {
+        const emotionStmt = sqlDb.prepare('SELECT date, score, note FROM emotions WHERE date BETWEEN ? AND ?');
+        emotionStmt.bind([start, end]);
+        while (emotionStmt.step()) {
+          const row = emotionStmt.getAsObject();
+          data[row.date] = { emotion: row.score, note: row.note };
+        }
+        emotionStmt.free();
+
+        const planStmt = sqlDb.prepare('SELECT date, title, growth FROM plans WHERE date BETWEEN ? AND ?');
+        planStmt.bind([start, end]);
+        while (planStmt.step()) {
+          const row = planStmt.getAsObject();
+          const records = [];
+          const recStmt = sqlDb.prepare('SELECT record FROM plan_records WHERE plan_date = ? ORDER BY created_at');
+          recStmt.bind([row.date]);
+          while (recStmt.step()) {
+            records.push(recStmt.getAsObject().record);
+          }
+          recStmt.free();
+          data[row.date] = data[row.date] || {};
+          data[row.date].plan = { title: row.title, growth: row.growth, records };
+        }
+        planStmt.free();
+      } else {
+        Object.entries(memoryData).forEach(([key, value]) => {
+          if (key >= start && key <= end) data[key] = value;
+        });
+      }
+
+      return data;
+    }
+
+    function saveEmotion(date, score, note) {
+      if (persistenceAvailable && sqlDb) {
+        sqlDb.run('INSERT OR REPLACE INTO emotions (date, score, note) VALUES (?, ?, ?)', [date, score, note || null]);
+      } else {
+        memoryData[date] = memoryData[date] || {};
+        memoryData[date].emotion = score;
+        if (note) memoryData[date].note = note;
+      }
+      persist();
+    }
+
+    function savePlan(date, title) {
+      if (persistenceAvailable && sqlDb) {
+        sqlDb.run('INSERT INTO plans (date, title, growth) VALUES (?, ?, 0)', [date, title]);
+      } else {
+        memoryData[date] = memoryData[date] || {};
+        memoryData[date].plan = { title, growth: 0, records: [] };
+      }
+      persist();
+    }
+
+    function addPlanRecord(date, note) {
+      const recordText = note || '完成一次行动';
+      if (persistenceAvailable && sqlDb) {
+        sqlDb.run('INSERT INTO plan_records (plan_date, record) VALUES (?, ?)', [date, recordText]);
+        sqlDb.run('UPDATE plans SET growth = growth + 1 WHERE date = ?', [date]);
+        const stmt = sqlDb.prepare('SELECT growth FROM plans WHERE date = ?');
+        stmt.bind([date]);
+        stmt.step();
+        const growth = stmt.getAsObject().growth;
+        stmt.free();
+        persist();
+        return growth;
+      }
+      memoryData[date].plan.records.push(recordText);
+      memoryData[date].plan.growth++;
+      persist();
+      return memoryData[date].plan.growth;
+    }
+
+    function clearDateData(date) {
+      if (persistenceAvailable && sqlDb) {
+        sqlDb.run('DELETE FROM emotions WHERE date = ?', [date]);
+        sqlDb.run('DELETE FROM plans WHERE date = ?', [date]);
+        sqlDb.run('DELETE FROM plan_records WHERE plan_date = ?', [date]);
+      } else {
+        delete memoryData[date];
+      }
+      persist();
+    }
+
+    function isDateOccupied(date) {
+      const data = getDateData(date);
+      return data && (data.emotion || data.plan);
+    }
+
+    function getGrowingSeeds() {
+      if (persistenceAvailable && sqlDb) {
+        const stmt = sqlDb.prepare('SELECT date, title, growth FROM plans WHERE growth < ? ORDER BY date');
+        stmt.bind([PLAN_THRESHOLD]);
+        const seeds = [];
+        while (stmt.step()) {
+          seeds.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return seeds;
+      }
+      return Object.entries(memoryData)
+        .filter(([_, value]) => value.plan && value.plan.growth < PLAN_THRESHOLD)
+        .map(([date, value]) => ({ date, title: value.plan.title, growth: value.plan.growth }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function getStats() {
+      if (persistenceAvailable && sqlDb) {
+        const execCount = (sql) => {
+          const result = sqlDb.exec(sql);
+          return result[0]?.values[0][0] || 0;
+        };
+        const completedStmt = sqlDb.prepare('SELECT COUNT(*) FROM plans WHERE growth >= ?');
+        completedStmt.bind([PLAN_THRESHOLD]);
+        completedStmt.step();
+        const completedPlans = completedStmt.getAsObject()['COUNT(*)'] || 0;
+        completedStmt.free();
+        return {
+          totalEmotionDays: execCount('SELECT COUNT(*) FROM emotions'),
+          positiveDays: execCount('SELECT COUNT(*) FROM emotions WHERE score > 0'),
+          negativeDays: execCount('SELECT COUNT(*) FROM emotions WHERE score < 0'),
+          totalPlans: execCount('SELECT COUNT(*) FROM plans'),
+          completedPlans,
+          totalRecords: execCount('SELECT COUNT(*) FROM plan_records')
+        };
+      }
+      const values = Object.values(memoryData);
+      const plans = values.filter(v => v.plan).map(v => v.plan);
+      return {
+        totalEmotionDays: values.filter(v => v.emotion).length,
+        positiveDays: values.filter(v => v.emotion && v.emotion > 0).length,
+        negativeDays: values.filter(v => v.emotion && v.emotion < 0).length,
+        totalPlans: plans.length,
+        completedPlans: plans.filter(p => p.growth >= PLAN_THRESHOLD).length,
+        totalRecords: plans.reduce((sum, p) => sum + (p.records?.length || 0), 0)
+      };
+    }
+
+    function renderStats() {
+      const grid = document.getElementById('stats-bento-grid');
+      const stats = getStats();
+      const completionRate = stats.totalPlans > 0
+        ? Math.round((stats.completedPlans / stats.totalPlans) * 100)
+        : 0;
+      const items = [
+        { value: stats.totalEmotionDays, label: '记录总天数', accent: 'accent-1' },
+        { value: stats.positiveDays, label: '正面情绪天数', accent: 'accent-2' },
+        { value: stats.negativeDays, label: '负面情绪天数', accent: 'accent-3' },
+        { value: `${completionRate}%`, label: '种子达成率', accent: 'accent-4' }
+      ];
+      grid.innerHTML = items.map(item => `
+        <div class="stats-bento-card ${item.accent}">
+          <div class="value">${item.value}</div>
+          <div class="label">${item.label}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderSeedList() {
+      const container = document.getElementById('seed-list-content');
+      const paginationEl = document.getElementById('seed-pagination');
+      const seeds = getGrowingSeeds();
+
+      if (!seeds.length) {
+        container.innerHTML = '<div class="seed-empty">暂无生长中的种子</div>';
+        paginationEl.innerHTML = '';
+        return;
+      }
+
+      const totalPages = Math.ceil(seeds.length / SEEDS_PER_PAGE);
+      seedListPage = Math.max(1, Math.min(seedListPage, totalPages));
+      const start = (seedListPage - 1) * SEEDS_PER_PAGE;
+      const pageSeeds = seeds.slice(start, start + SEEDS_PER_PAGE);
+
+      container.innerHTML = pageSeeds.map(s => {
+        const date = new Date(s.date + 'T00:00:00');
+        const dateText = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        const progress = Math.min(100, Math.round((s.growth / PLAN_THRESHOLD) * 100));
+        return `
+          <div class="seed-card">
+            <div class="seed-progress" style="--growth-progress: ${progress}%"></div>
+            <div class="seed-card-actions" data-date="${s.date}">
+              <button class="btn-goto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>前往</button>
+            </div>
+            <div class="seed-card-date">${dateText}</div>
+            <div class="seed-card-title">${escapeHtml(s.title)}</div>
+            <div class="seed-card-growth">成长值：${s.growth}/${PLAN_THRESHOLD}</div>
+          </div>
+        `;
+      }).join('');
+
+      // 把点击事件绑定到操作块容器，使按钮周围区域也能触发跳转
+      container.querySelectorAll('.seed-card-actions').forEach(actions => {
+        actions.addEventListener('click', () => {
+          const dateStr = actions.dataset.date;
+          if (!dateStr) return;
+          const date = new Date(dateStr + 'T00:00:00');
+          currentYear = date.getFullYear();
+          currentMonth = date.getMonth();
+          renderCalendar(currentYear, currentMonth);
+          if (highlightGotoDate) highlightGotoDate(dateStr);
+          // 2 秒后自动打开该日期详情弹窗
+          setTimeout(() => {
+            openDateDetail(dateStr);
+          }, 2000);
+        });
+      });
+
+      if (totalPages > 1) {
+        paginationEl.innerHTML = `
+          <button ${seedListPage <= 1 ? 'disabled' : ''} data-delta="-1">‹</button>
+          <span class="page-info">${seedListPage}/${totalPages}</span>
+          <button ${seedListPage >= totalPages ? 'disabled' : ''} data-delta="1">›</button>
+        `;
+        paginationEl.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const delta = parseInt(btn.dataset.delta, 10);
+            seedListPage += delta;
+            renderSeedList();
+          });
+        });
+      } else {
+        paginationEl.innerHTML = '';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // WebGL 可用性检测
+    let webglAvailable = false;
+    try {
+      const canvas = document.createElement('canvas');
+      webglAvailable = !!(window.WebGLRenderingContext &&
+        (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    } catch (e) { webglAvailable = false; }
+
+    let renderCalendar = () => {};
+    let highlightGotoDate = null;
+    let currentAtmosphere = 'day';
+    let scene, dirLight, ambientLight, groundBase, groundShadow, fireflyGroup;
+    let openDateDetail = (key) => {};
+
+    if (webglAvailable) {
+    // ============ 资源缓存池（减少重复创建与 GPU 纹理切换） ============
+    const textureAtlas = (() => {
+      const size = 1024;
+      const cols = 8;
+      const cell = size / cols;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${cell * 0.58}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const entries = [];
+      // 1-31 日期数字
+      for (let i = 1; i <= 31; i++) entries.push(i.toString());
+      // 日-六 星期文字
+      ['日', '一', '二', '三', '四', '五', '六'].forEach(d => entries.push(d));
+
+      entries.forEach((text, idx) => {
+        const cx = (idx % cols) * cell + cell / 2;
+        const cy = Math.floor(idx / cols) * cell + cell / 2 + cell * 0.02;
+        ctx.clearRect((idx % cols) * cell, Math.floor(idx / cols) * cell, cell, cell);
+        ctx.fillText(text, cx, cy);
+      });
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return { texture: tex, cell, cols, entries };
+    })();
+
+    const labelMaterialCache = new Map();
+    function getLabelMaterial(color) {
+      if (!labelMaterialCache.has(color)) {
+        labelMaterialCache.set(color, new THREE.MeshBasicMaterial({
+          map: textureAtlas.texture,
+          color,
+          transparent: true,
+          opacity: 0.92,
+          alphaTest: 0.5,
+          depthWrite: false
+        }));
+      }
+      return labelMaterialCache.get(color);
+    }
+
+    const flowerPaletteCache = new Map();
+    function getFlowerPaletteMaterial(emotionScore) {
+      const key = emotionScore < 0 ? 'negative' : 'positive';
+      if (!flowerPaletteCache.has(key)) {
+        const palette = emotionScore < 0
+          ? PLANT_CONFIG.colors.flowerNegative
+          : PLANT_CONFIG.colors.flowerPositive;
+        flowerPaletteCache.set(key, palette.map(c => new THREE.MeshToonMaterial({ color: c, side: THREE.DoubleSide })));
+      }
+      return flowerPaletteCache.get(key);
+    }
+
+    const stemMaterial = new THREE.MeshToonMaterial({ color: PLANT_CONFIG.colors.stem, side: THREE.DoubleSide });
+    const centerMaterial = new THREE.MeshToonMaterial({ color: PLANT_CONFIG.colors.flowerCenter });
+    const seedBodyMaterial = new THREE.MeshToonMaterial({ color: PLANT_CONFIG.seed.body.color });
+
+    const geometryCache = {
+      petal: null,
+      leaf: new Map(),
+      center: null,
+      seedBody: null,
+      seedTip: new Map(),
+      labelPlane: null
+    };
+
+    // ============ Three.js 基础 ============
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xEAE7DF);
+    scene.fog = new THREE.Fog(0xEAE7DF, 18, 40);
+
+    const cols = 7, rows = 6;
+    const cellSize = 1.05;
+
+    geometryCache.labelPlane = new THREE.PlaneGeometry(cellSize * 0.55, cellSize * 0.55);
+    const gridW = cols * cellSize;
+    const gridH = rows * cellSize;
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const frustumSize = 12;
+    const camera = new THREE.OrthographicCamera(
+      -frustumSize * aspect / 2, frustumSize * aspect / 2,
+      frustumSize / 2, -frustumSize / 2,
+      0.1, 1000
+    );
+    camera.position.set(10, 10, 10);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.BasicShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    const camCfg = PLANT_CONFIG.camera;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minZoom = camCfg.minZoom;
+    controls.maxZoom = camCfg.maxZoom;
+    controls.minPolarAngle = camCfg.minPolarAngle;
+    controls.maxPolarAngle = camCfg.maxPolarAngle;
+    controls.minAzimuthAngle = camCfg.minAzimuthAngle;
+    controls.maxAzimuthAngle = camCfg.maxAzimuthAngle;
+    controls.enablePan = camCfg.enablePan;
+    controls.target.set(0, 0, 0);
+
+    dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    dirLight.position.set(6, 16, 5);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.set(2048, 2048);
+    dirLight.shadow.camera.near = 0.1;
+    dirLight.shadow.camera.far = 60;
+    dirLight.shadow.camera.left = -18;
+    dirLight.shadow.camera.right = 18;
+    dirLight.shadow.camera.top = 16;
+    dirLight.shadow.camera.bottom = -16;
+    dirLight.shadow.bias = -0.0005;
+    scene.add(dirLight);
+
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    scene.add(ambientLight);
+
+    // 地面
+    groundBase = new THREE.Mesh(
+      new THREE.PlaneGeometry(60, 60),
+      new THREE.MeshBasicMaterial({ color: 0xF5F1E8 })
+    );
+    groundBase.rotation.x = -Math.PI / 2;
+    groundBase.position.y = -0.001;
+    scene.add(groundBase);
+
+    groundShadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(60, 60),
+      new THREE.ShadowMaterial({ color: 0x2C2C2C, opacity: 0.1 })
+    );
+    groundShadow.rotation.x = -Math.PI / 2;
+    groundShadow.receiveShadow = true;
+    scene.add(groundShadow);
+
+    // 萤火虫（3D）
+    const fireflyCfg = PLANT_CONFIG.firefly;
+    const fireflyTexture = (() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.25, 'rgba(212,247,106,0.85)');
+      grad.addColorStop(0.55, 'rgba(212,247,106,0.25)');
+      grad.addColorStop(1, 'rgba(212,247,106,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(canvas);
+    })();
+
+    fireflyGroup = new THREE.Group();
+    fireflyGroup.visible = false;
+    scene.add(fireflyGroup);
+    const fireflySprites = [];
+
+    for (let i = 0; i < fireflyCfg.maxCount; i++) {
+      const material = new THREE.SpriteMaterial({
+        map: fireflyTexture,
+        color: fireflyCfg.color,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const sprite = new THREE.Sprite(material);
+      const x = (Math.random() - 0.5) * 2 * fireflyCfg.areaX;
+      const y = fireflyCfg.heightMin + Math.random() * (fireflyCfg.heightMax - fireflyCfg.heightMin);
+      const z = (Math.random() - 0.5) * 2 * fireflyCfg.areaZ;
+      sprite.position.set(x, y, z);
+      sprite.scale.set(fireflyCfg.size, fireflyCfg.size, 1);
+      sprite.userData = {
+        baseX: x,
+        baseY: y,
+        baseZ: z,
+        vx: (Math.random() - 0.5) * fireflyCfg.driftSpeed,
+        vy: (Math.random() - 0.5) * fireflyCfg.driftSpeed * 0.5,
+        vz: (Math.random() - 0.5) * fireflyCfg.driftSpeed,
+        phase: Math.random() * Math.PI * 2,
+        speed: fireflyCfg.blinkSpeedMin + Math.random() * (fireflyCfg.blinkSpeedMax - fireflyCfg.blinkSpeedMin)
+      };
+      fireflySprites.push(sprite);
+      fireflyGroup.add(sprite);
+    }
+
+    // ============ 几何工具 ============
+    function createPetalGeometry(width, length) {
+      if (!geometryCache.petal) {
+        const shape = new THREE.Shape();
+        shape.absarc(0, 0, PLANT_CONFIG.petal.baseRadius, 0, Math.PI * 2, false);
+        geometryCache.petal = new THREE.ExtrudeGeometry(shape, { depth: PLANT_CONFIG.petal.depth, bevelEnabled: false, steps: 1 });
+      }
+      const geo = geometryCache.petal.clone();
+      geo.scale(width / (2 * PLANT_CONFIG.petal.baseRadius), length / (2 * PLANT_CONFIG.petal.baseRadius), 1);
+      geo.translate(0, length / 2, 0);
+      return geo;
+    }
+
+    function createLeafGeometry(width, length) {
+      const cfg = PLANT_CONFIG.leaf;
+      // 以 0.01 为精度缓存叶片几何，减少重复生成
+      const cacheKey = `${Math.round(width * 100)}_${Math.round(length * 100)}`;
+      if (!geometryCache.leaf.has(cacheKey)) {
+        const shape = new THREE.Shape();
+        shape.moveTo(0, 0);
+        shape.bezierCurveTo(width * cfg.widthControl1, length * cfg.lengthControl1, width * cfg.widthControl2, length * cfg.lengthControl2, 0, length);
+        shape.bezierCurveTo(-width * cfg.widthControl2, length * cfg.lengthControl2, -width * cfg.widthControl1, length * cfg.lengthControl1, 0, 0);
+        const geo = new THREE.ExtrudeGeometry(shape, {
+          depth: cfg.depth,
+          bevelEnabled: true,
+          bevelThickness: cfg.bevelThickness,
+          bevelSize: cfg.bevelSize,
+          bevelSegments: cfg.bevelSegments,
+          steps: 1
+        });
+
+        // 给叶片沿长度方向增加自然弯曲，避免太平直
+        if (cfg.curve && length > 0) {
+          const positions = geo.attributes.position;
+          for (let i = 0; i < positions.count; i++) {
+            const y = positions.getY(i);
+            const t = Math.max(0, Math.min(1, y / length));
+            const z = positions.getZ(i);
+            positions.setZ(i, z + cfg.curve * length * t * t);
+          }
+          geo.computeVertexNormals();
+        }
+
+        geo.translate(0, 0, -cfg.depth / 2);
+        geometryCache.leaf.set(cacheKey, geo);
+      }
+      return geometryCache.leaf.get(cacheKey);
+    }
+
+    function attachLeaf(group, curve, t, width, length, leafMat, scale = 1, droopRange = null, rollSpread = null, faceUp = false, upwardTiltRange = null) {
+      const cfg = PLANT_CONFIG.flower.leaves;
+      const point = curve.getPoint(t);
+      const tangent = curve.getTangent(t).normalize();
+
+      // random outward direction perpendicular to stem
+      const helper = Math.abs(tangent.y) > 0.95 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+      const perp = new THREE.Vector3().crossVectors(tangent, helper).normalize();
+      const outward = perp.applyAxisAngle(tangent, Math.random() * Math.PI * 2);
+
+      const leaf = new THREE.Mesh(createLeafGeometry(width, length), leafMat);
+      leaf.scale.setScalar(0);
+      leaf.position.copy(point);
+
+      if (faceUp) {
+        // 叶面向上，向外自然扬起，带轻微扭转
+        const worldUp = new THREE.Vector3(0, 1, 0);
+        const yAxis = outward.clone().normalize();
+        const zAxis = worldUp.clone();
+        const xAxis = new THREE.Vector3().crossVectors(yAxis, zAxis).normalize();
+        zAxis.crossVectors(xAxis, yAxis).normalize();
+
+        const rotMatrix = new THREE.Matrix4();
+        rotMatrix.makeBasis(xAxis, yAxis, zAxis);
+        leaf.quaternion.setFromRotationMatrix(rotMatrix);
+
+        const tiltRange = upwardTiltRange || [cfg.upwardTiltMin, cfg.upwardTiltMax];
+        const tilt = tiltRange[0] + Math.random() * (tiltRange[1] - tiltRange[0]);
+        leaf.rotateX(tilt);
+
+        const spread = rollSpread !== null ? rollSpread : cfg.twistSpread;
+        const twist = (Math.random() - 0.5) * spread;
+        leaf.rotateY(twist);
+      } else {
+        // 自然下垂/扭转逻辑（保留给可能需要的旧用法）
+        const up = new THREE.Vector3(0, 1, 0);
+        leaf.quaternion.setFromUnitVectors(up, outward);
+        const droopMin = droopRange ? droopRange[0] : 0;
+        const droopMax = droopRange ? droopRange[1] : 0;
+        leaf.rotateX(droopMin + Math.random() * (droopMax - droopMin));
+        const spread = rollSpread !== null ? rollSpread : 0;
+        leaf.rotateZ((Math.random() - 0.5) * spread);
+      }
+
+      // 叶片较小且数量多，不投射阴影以减轻渲染压力
+      leaf.castShadow = false;
+      group.add(leaf);
+      return { mesh: leaf, t, baseScale: scale };
+    }
+
+    function createFlower(x, z, scaleFactor, emotionScore = 3) {
+      const cfg = PLANT_CONFIG.flower;
+      const group = new THREE.Group();
+      const H = cfg.stem.heightMin + Math.random() * (cfg.stem.heightMax - cfg.stem.heightMin);
+      const bend = cfg.stem.bend;
+      const bendX = (Math.random() - 0.5) * bend;
+      const bendZ = (Math.random() - 0.5) * bend;
+      const petalCount = cfg.head.petalCountMin + Math.floor(Math.random() * (cfg.head.petalCountMax - cfg.head.petalCountMin + 1));
+      const petalLen = cfg.head.petalLengthMin + Math.random() * (cfg.head.petalLengthMax - cfg.head.petalLengthMin);
+      const petalWid = cfg.head.petalWidthMin + Math.random() * (cfg.head.petalWidthMax - cfg.head.petalWidthMin);
+
+      const curve = new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(bendX, H * 0.55, bendZ),
+        new THREE.Vector3(bendX * 0.5, H, bendZ * 0.5)
+      );
+
+      const stem = new THREE.Mesh(
+        new THREE.TubeGeometry(curve, cfg.stem.tubeSegments, cfg.stem.radius, cfg.stem.radialSegments, false),
+        stemMaterial
+      );
+      stem.castShadow = true;
+      stem.scale.y = 0.05;
+      group.add(stem);
+
+      // 随机茎叶（0-3 片，小巧自然地附着在茎上）
+      const leafCount = cfg.leaves.countMin + Math.floor(Math.random() * (cfg.leaves.countMax - cfg.leaves.countMin + 1));
+      const stemLeaves = [];
+      for (let i = 0; i < leafCount; i++) {
+        const t = cfg.leaves.tMin + Math.random() * (cfg.leaves.tMax - cfg.leaves.tMin);
+        const scale = cfg.leaves.baseScaleMin + Math.random() * (cfg.leaves.baseScaleMax - cfg.leaves.baseScaleMin);
+        stemLeaves.push(attachLeaf(group, curve, t, cfg.leaves.width, cfg.leaves.length, stemMaterial, scale, null, null, true, [cfg.leaves.upwardTiltMin, cfg.leaves.upwardTiltMax]));
+      }
+
+      const head = new THREE.Group();
+      head.position.set(bendX * 0.5, H * 0.05, bendZ * 0.5);
+      head.scale.setScalar(0);
+
+      const tangent = curve.getTangent(1).normalize();
+      const up = new THREE.Vector3(0, 1, 0);
+      const axis = new THREE.Vector3().crossVectors(up, tangent).normalize();
+      const angle = Math.acos(Math.min(1, Math.max(-1, up.dot(tangent))));
+      if (axis.lengthSq() > 0.001) head.rotateOnAxis(axis, angle);
+
+      if (!geometryCache.center) {
+        geometryCache.center = new THREE.CylinderGeometry(cfg.head.centerRadius, cfg.head.centerRadius, cfg.head.centerHeight, cfg.head.centerSegments);
+      }
+      const center = new THREE.Mesh(geometryCache.center, centerMaterial);
+      center.castShadow = true;
+      head.add(center);
+
+      const petalGeo = createPetalGeometry(petalWid, petalLen);
+      const paletteMats = getFlowerPaletteMaterial(emotionScore);
+      const petalMat = paletteMats[Math.floor(Math.random() * paletteMats.length)];
+
+      for (let i = 0; i < petalCount; i++) {
+        const theta = (i / petalCount) * Math.PI * 2 + (Math.random() - 0.5) * cfg.head.petalRotationJitter;
+        const pg = new THREE.Group();
+        pg.rotation.y = theta;
+        const petal = new THREE.Mesh(petalGeo, petalMat);
+        petal.rotation.x = cfg.head.petalAngle;
+        petal.position.z = cfg.head.petalOffsetZ;
+        // 花瓣较小且数量多，不投射阴影以减轻首次渲染压力
+        petal.castShadow = false;
+        pg.add(petal);
+        head.add(pg);
+      }
+
+      group.add(head);
+      group.position.set(x, 0, z);
+
+      const baseScale = cfg.scale.baseMin + scaleFactor * (cfg.scale.baseMax - cfg.scale.baseMin);
+      group.userData = {
+        type: 'flower',
+        stem, head, curve, stemLeaves,
+        bendX, bendZ, stemHeight: H,
+        targetScale: baseScale,
+        swaySpeed: cfg.animation.swaySpeedMin + Math.random() * (cfg.animation.swaySpeedMax - cfg.animation.swaySpeedMin),
+        phase: Math.random() * Math.PI * 2,
+        growthProgress: 0,
+        growthSpeed: cfg.animation.growthSpeedMin + Math.random() * (cfg.animation.growthSpeedMax - cfg.animation.growthSpeedMin),
+        baseRotX: (Math.random() - 0.5) * 0.1,
+        baseRotZ: (Math.random() - 0.5) * 0.1
+      };
+      group.rotation.x = group.userData.baseRotX;
+      group.rotation.z = group.userData.baseRotZ;
+
+      return group;
+    }
+
+    function createSeed(x, z, growth) {
+      const cfg = PLANT_CONFIG.seed;
+      const group = new THREE.Group();
+
+      // 种子本体：水滴形，更贴近真实种子
+      if (!geometryCache.seedBody) {
+        geometryCache.seedBody = new THREE.SphereGeometry(cfg.body.radius, cfg.body.widthSegments, cfg.body.heightSegments);
+      }
+      const seed = new THREE.Mesh(geometryCache.seedBody, seedBodyMaterial);
+      seed.scale.set(cfg.body.scaleX, cfg.body.scaleY, cfg.body.scaleZ);
+      seed.castShadow = true;
+      group.add(seed);
+
+      // 从种子内部长出的弯曲嫩芽
+      const sproutH = cfg.sprout.heightMin + growth * cfg.sprout.heightGrowthFactor;
+      const tipX = (Math.random() - 0.5) * cfg.sprout.bend;
+      const tipZ = (Math.random() - 0.5) * cfg.sprout.bend;
+      const sproutCurve = new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(0, cfg.sprout.startOffsetY, 0),
+        new THREE.Vector3(tipX * 0.25, sproutH * 0.45, tipZ * 0.25),
+        new THREE.Vector3(tipX, sproutH, tipZ)
+      );
+      const sproutRadius = cfg.sprout.radius + growth * cfg.sprout.radiusGrowthFactor;
+      const sprout = new THREE.Mesh(
+        new THREE.TubeGeometry(sproutCurve, cfg.sprout.tubeSegments, sproutRadius, 8, false),
+        stemMaterial
+      );
+      sprout.castShadow = true;
+      group.add(sprout);
+
+      // 嫩芽顶端圆润收尾，避免出现方块
+      const tipKey = Math.round(sproutRadius * 100);
+      if (!geometryCache.seedTip.has(tipKey)) {
+        geometryCache.seedTip.set(tipKey, new THREE.SphereGeometry(sproutRadius * cfg.sprout.tipRadiusFactor, cfg.sprout.tipSegments, cfg.sprout.tipSegments));
+      }
+      const tip = new THREE.Mesh(geometryCache.seedTip.get(tipKey), stemMaterial);
+      tip.position.copy(sproutCurve.getPoint(1));
+      group.add(tip);
+
+      // 小嫩叶附着在嫩芽上，比花的叶片更小
+      const seedLeaves = [];
+      if (growth > cfg.leaves.growthThreshold) {
+        const leafCount = cfg.leaves.countMin + Math.floor(Math.random() * (cfg.leaves.countMax - cfg.leaves.countMin + 1));
+        for (let i = 0; i < leafCount; i++) {
+          const t = cfg.leaves.tMin + Math.random() * (cfg.leaves.tMax - cfg.leaves.tMin);
+          const scale = cfg.leaves.baseScaleMin + Math.random() * (cfg.leaves.baseScaleMax - cfg.leaves.baseScaleMin);
+          seedLeaves.push(attachLeaf(group, sproutCurve, t, cfg.leaves.width, cfg.leaves.length, stemMaterial, scale, null, cfg.leaves.twistSpread, true, [cfg.leaves.upwardTiltMin, cfg.leaves.upwardTiltMax]));
+        }
+      }
+
+      // 让种子底部略微埋入土中，整体更自然
+      group.position.set(x, cfg.groundOffset, z);
+      group.scale.setScalar(0);
+      group.userData = {
+        type: 'seed',
+        growthProgress: 0,
+        growthSpeed: cfg.animation.growthSpeedMin + Math.random() * (cfg.animation.growthSpeedMax - cfg.animation.growthSpeedMin),
+        targetScale: cfg.scale.baseMin + growth * (cfg.scale.baseMax - cfg.scale.baseMin),
+        swaySpeed: cfg.animation.swaySpeedMin + Math.random() * (cfg.animation.swaySpeedMax - cfg.animation.swaySpeedMin),
+        phase: Math.random() * Math.PI * 2,
+        baseRotX: 0,
+        baseRotZ: 0,
+        seedLeaves
+      };
+
+      return group;
+    }
+
+    function createNumberTexture(number, color) {
+      return createTextTexture(number.toString(), color);
+    }
+
+    function createTextTexture(text, color) {
+      // 保留此函数以兼容可能的旧调用；新实现复用全局图集材质
+      const idx = textureAtlas.entries.indexOf(text);
+      if (idx === -1) {
+        // 回退：创建独立纹理（保险起见）
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, 256, 256);
+        ctx.font = 'bold 150px "PingFang SC", "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color;
+        ctx.fillText(text, 128, 132);
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.minFilter = THREE.LinearFilter;
+        return tex;
+      }
+      const mat = getLabelMaterial(color);
+      const u = (idx % textureAtlas.cols) / textureAtlas.cols;
+      const v = 1 - (Math.floor(idx / textureAtlas.cols) + 1) / textureAtlas.cols;
+      const du = 1 / textureAtlas.cols;
+      const dv = 1 / textureAtlas.cols;
+      return { material: mat, uvOffset: { u, v, du, dv } };
+    }
+
+    function applyAtlasUV(geometry, uvOffset) {
+      const posAttr = geometry.attributes.position;
+      const uvAttr = geometry.attributes.uv;
+      for (let i = 0; i < posAttr.count; i++) {
+        const px = posAttr.getX(i);
+        const py = posAttr.getY(i);
+        const u = px > 0 ? uvOffset.u + uvOffset.du : uvOffset.u;
+        const v = py > 0 ? uvOffset.v + uvOffset.dv : uvOffset.v;
+        uvAttr.setXY(i, u, v);
+      }
+      uvAttr.needsUpdate = true;
+    }
+
+    function createAtlasLabel(text, color, geometry = geometryCache.labelPlane.clone()) {
+      const texInfo = createTextTexture(text, color);
+      let mat;
+      if (texInfo && texInfo.material) {
+        mat = texInfo.material;
+        applyAtlasUV(geometry, texInfo.uvOffset);
+      } else {
+        mat = new THREE.MeshBasicMaterial({
+          map: texInfo, transparent: true, opacity: 0.92, alphaTest: 0.5, depthWrite: false
+        });
+      }
+      return new THREE.Mesh(geometry, mat);
+    }
+
+    function createDateLabel(number, x, z, dateKey, isCurrentMonth) {
+      const calCfg = PLANT_CONFIG.calendar[currentAtmosphere];
+      const color = dateKey === todayKey ? calCfg.currentDate : (isCurrentMonth ? calCfg.labelActive : calCfg.labelDim);
+      const mesh = createAtlasLabel(number.toString(), color);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(x, 0.006, z);
+      mesh.userData = { dateKey, isCurrentMonth, type: 'label' };
+      return mesh;
+    }
+
+    function createCellBorderFrame(x, z, color, thickness = 0.04, size = cellSize, y = 0.012) {
+      const group = new THREE.Group();
+      const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 });
+      const half = size / 2;
+      const thick = thickness;
+
+      const top = new THREE.Mesh(new THREE.BoxGeometry(size, 0.006, thick), material);
+      top.position.set(0, 0, -half + thick / 2);
+      group.add(top);
+
+      const bottom = new THREE.Mesh(new THREE.BoxGeometry(size, 0.006, thick), material);
+      bottom.position.set(0, 0, half - thick / 2);
+      group.add(bottom);
+
+      const left = new THREE.Mesh(new THREE.BoxGeometry(thick, 0.006, size - thick * 2), material);
+      left.position.set(-half + thick / 2, 0, 0);
+      group.add(left);
+
+      const right = new THREE.Mesh(new THREE.BoxGeometry(thick, 0.006, size - thick * 2), material);
+      right.position.set(half - thick / 2, 0, 0);
+      group.add(right);
+
+      group.position.set(x, y, z);
+      group.userData = { type: 'cellBorderFrame' };
+      return group;
+    }
+
+    // ============ 日历渲染 ============
+    const calendarObjects = new THREE.Group();
+    scene.add(calendarObjects);
+    const labels = [];
+    const animatables = [];
+    let gotoFrame = null;
+    let gotoFrameStartTime = 0;
+    let plantSpawnQueue = [];
+    let isSpawning = false;
+    let spawnAnimationId = null;
+
+    function flushSpawnQueue() {
+      if (spawnAnimationId) {
+        cancelAnimationFrame(spawnAnimationId);
+        spawnAnimationId = null;
+      }
+      plantSpawnQueue.length = 0;
+      isSpawning = false;
+    }
+
+    function spawnPlantsBatch() {
+      if (plantSpawnQueue.length === 0) {
+        isSpawning = false;
+        spawnAnimationId = null;
+        return;
+      }
+      // 每帧最多生成 2 株植物，避免首次加载时一次性创建全部几何体阻塞主线程
+      const batchSize = 2;
+      for (let i = 0; i < batchSize && plantSpawnQueue.length > 0; i++) {
+        const { createFn, x, z, dateKey, extra } = plantSpawnQueue.shift();
+        const plant = createFn();
+        plant.userData.dateKey = dateKey;
+        if (extra) Object.assign(plant.userData, extra);
+        calendarObjects.add(plant);
+        animatables.push(plant);
+      }
+      spawnAnimationId = requestAnimationFrame(spawnPlantsBatch);
+    }
+
+    function schedulePlant(createFn, x, z, dateKey, extra = null) {
+      plantSpawnQueue.push({ createFn, x, z, dateKey, extra });
+      if (!isSpawning) {
+        isSpawning = true;
+        spawnAnimationId = requestAnimationFrame(spawnPlantsBatch);
+      }
+    }
+
+    function getCalendarCells(year, month) {
+      const firstDay = new Date(year, month, 1);
+      const startDayOfWeek = firstDay.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      const cells = [];
+      let dayCounter = 1 - startDayOfWeek;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const date = new Date(year, month, dayCounter);
+          cells.push({
+            row: r, col: c,
+            date,
+            day: date.getDate(),
+            isCurrentMonth: date.getMonth() === month,
+            key: formatDate(date)
+          });
+          dayCounter++;
+        }
+      }
+      return cells;
+    }
+
+    renderCalendar = function(year, month) {
+      // 取消尚未完成的异步植物生成，防止切月时旧对象继续被加入场景
+      flushSpawnQueue();
+
+      // 淡出旧对象
+      while (calendarObjects.children.length > 0) {
+        const child = calendarObjects.children[0];
+        calendarObjects.remove(child);
+      }
+      labels.length = 0;
+      animatables.length = 0;
+      gotoFrame = null;
+
+      const cells = getCalendarCells(year, month);
+      const startX = -(cols - 1) * cellSize / 2;
+      const startZ = -(rows - 1) * cellSize / 2;
+      const monthData = getMonthData(year, month);
+      const calCfg = PLANT_CONFIG.calendar[currentAtmosphere];
+
+      // 网格线
+      const points = [];
+      for (let i = 0; i <= cols; i++) {
+        const x = -gridW / 2 + i * cellSize;
+        points.push(new THREE.Vector3(x, 0.002, -gridH / 2));
+        points.push(new THREE.Vector3(x, 0.002, gridH / 2));
+      }
+      for (let i = 0; i <= rows; i++) {
+        const z = -gridH / 2 + i * cellSize;
+        points.push(new THREE.Vector3(-gridW / 2, 0.002, z));
+        points.push(new THREE.Vector3(gridW / 2, 0.002, z));
+      }
+      const gridGeo = new THREE.BufferGeometry().setFromPoints(points);
+      const gridLine = new THREE.LineSegments(gridGeo, new THREE.LineBasicMaterial({
+        color: calCfg.gridLine, transparent: true, opacity: 0.5
+      }));
+      calendarObjects.add(gridLine);
+
+      // 日期单元格
+      cells.forEach(cell => {
+        const x = startX + cell.col * cellSize;
+        const z = startZ + cell.row * cellSize;
+
+        const data = cell.isCurrentMonth ? monthData[cell.key] : null;
+
+        const label = createDateLabel(cell.day, x, z, cell.key, cell.isCurrentMonth);
+        label.scale.setScalar(0.65);
+        label.position.z += cellSize * 0.30;
+        calendarObjects.add(label);
+        labels.push(label);
+
+        if (cell.key === todayKey) {
+          const frame = createCellBorderFrame(x, z, PLANT_CONFIG.calendar[currentAtmosphere].currentBorder, 0.045, cellSize, 0.012);
+          calendarObjects.add(frame);
+        }
+
+        if (!cell.isCurrentMonth) return;
+
+        if (!data) return;
+
+        if (data.emotion !== undefined && data.emotion !== 0) {
+          const scaleFactor = 0.5 + Math.abs(data.emotion) / 4 * 0.6;
+          schedulePlant(() => createFlower(x, z, scaleFactor, data.emotion), x, z, cell.key);
+        } else if (data.plan) {
+          if (data.plan.growth >= PLAN_THRESHOLD) {
+            schedulePlant(() => createFlower(x, z, 0.7 + Math.min(data.plan.growth, 5) / 5 * 0.5, 3), x, z, cell.key, { fromPlan: true });
+          } else {
+            schedulePlant(() => createSeed(x, z, data.plan.growth / PLAN_THRESHOLD), x, z, cell.key);
+          }
+        }
+      });
+
+      // 星期标注（日期矩阵下方，同一平面）
+      const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+      const weekLabelZ = startZ + rows * cellSize;
+      weekDays.forEach((day, c) => {
+        const x = startX + c * cellSize;
+        const mesh = createAtlasLabel(day, calCfg.weekLabel);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(x, 0.006, weekLabelZ);
+        calendarObjects.add(mesh);
+      });
+
+      document.getElementById('month-label').textContent =
+        `${year}年${String(month + 1).padStart(2, '0')}月`;
+    }
+
+    highlightGotoDate = (dateStr) => {
+      const cells = getCalendarCells(currentYear, currentMonth);
+      const targetCell = cells.find(c => c.key === dateStr);
+      if (!targetCell) return;
+      const startX = -(cols - 1) * cellSize / 2;
+      const startZ = -(rows - 1) * cellSize / 2;
+      const tx = startX + targetCell.col * cellSize;
+      const tz = startZ + targetCell.row * cellSize;
+      if (gotoFrame && gotoFrame.parent) gotoFrame.parent.remove(gotoFrame);
+      gotoFrame = createCellBorderFrame(tx, tz, PLANT_CONFIG.calendar[currentAtmosphere].gotoBorder, 0.055, cellSize, 0.014);
+      calendarObjects.add(gotoFrame);
+      gotoFrameStartTime = clock.getElapsedTime();
+    };
+
+    // ============ 动画与交互 ============
+    function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
+
+    function windValue(time, speed, phase) {
+      return Math.sin(time * speed + phase) * 0.6
+           + Math.sin(time * speed * 2.3 + phase * 1.7) * 0.4;
+    }
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      animatables.forEach(obj => {
+        const d = obj.userData;
+        const flowerCfg = PLANT_CONFIG.flower.animation;
+        const seedCfg = PLANT_CONFIG.seed.animation;
+        if (d.type === 'flower') {
+          if (d.growthProgress < 1) {
+            d.growthProgress += delta * d.growthSpeed;
+            const p = Math.min(1, d.growthProgress);
+            const stemP = Math.min(1, p / flowerCfg.stemGrowPhase);
+            const stemScale = 0.05 + 0.95 * easeOutQuad(stemP);
+            d.stem.scale.y = stemScale;
+            d.head.position.set(d.bendX * 0.5, d.stemHeight * stemScale, d.bendZ * 0.5);
+
+            // 茎叶随茎生长而展开
+            if (d.stemLeaves) {
+              d.stemLeaves.forEach(l => {
+                const base = d.curve.getPoint(l.t);
+                l.mesh.position.set(base.x, base.y * stemScale, base.z);
+                if (p > flowerCfg.leafStartPhase) {
+                  const leafP = Math.min(1, (p - flowerCfg.leafStartPhase) / (1 - flowerCfg.leafStartPhase));
+                  l.mesh.scale.setScalar(easeOutQuad(leafP) * l.baseScale);
+                }
+              });
+            }
+
+            if (p > flowerCfg.stemGrowPhase) {
+              const headP = (p - flowerCfg.stemGrowPhase) / flowerCfg.headGrowPhase;
+              d.head.scale.setScalar(easeOutQuad(headP) * d.targetScale);
+            }
+          } else {
+            const amp = flowerCfg.swayAmplitude;
+            obj.rotation.x = d.baseRotX + windValue(time, d.swaySpeed, d.phase) * amp;
+            obj.rotation.z = d.baseRotZ + windValue(time, d.swaySpeed * 0.8, d.phase + 2) * amp;
+            d.head.rotation.z = windValue(time, d.swaySpeed * 1.4, d.phase + 1) * 0.035;
+            d.head.rotation.x = windValue(time, d.swaySpeed * 1.1, d.phase + 3) * 0.025;
+          }
+        } else if (d.type === 'seed') {
+          if (d.growthProgress < 1) {
+            d.growthProgress += delta * d.growthSpeed;
+            const p = Math.min(1, d.growthProgress);
+            obj.scale.setScalar(easeOutQuad(p) * d.targetScale);
+            // 种子叶片随种子一起长大
+            if (d.seedLeaves) {
+              d.seedLeaves.forEach(l => {
+                l.mesh.scale.setScalar(easeOutQuad(p) * l.baseScale);
+              });
+            }
+          } else {
+            const amp = seedCfg.swayAmplitude;
+            obj.rotation.z = windValue(time, d.swaySpeed, d.phase) * amp;
+          }
+        }
+      });
+
+      if (fireflyGroup.visible) {
+        fireflySprites.forEach(fly => {
+          const ud = fly.userData;
+          fly.position.x += ud.vx * delta;
+          fly.position.y += ud.vy * delta;
+          fly.position.z += ud.vz * delta;
+
+          // 将萤火虫限制在日历矩阵范围内（以原点为中心）
+          if (fly.position.x > fireflyCfg.areaX) ud.vx = -Math.abs(ud.vx);
+          if (fly.position.x < -fireflyCfg.areaX) ud.vx = Math.abs(ud.vx);
+          if (fly.position.y > fireflyCfg.heightMax) ud.vy = -Math.abs(ud.vy);
+          if (fly.position.y < fireflyCfg.heightMin) ud.vy = Math.abs(ud.vy);
+          if (fly.position.z > fireflyCfg.areaZ) ud.vz = -Math.abs(ud.vz);
+          if (fly.position.z < -fireflyCfg.areaZ) ud.vz = Math.abs(ud.vz);
+
+          fly.material.opacity = 0.3 + 0.55 * (0.5 + 0.5 * Math.sin(time * ud.speed + ud.phase));
+        });
+      }
+
+      // 种子“前往”高亮闪烁
+      if (gotoFrame && gotoFrame.parent) {
+        const elapsed = clock.getElapsedTime() - gotoFrameStartTime;
+        const opacity = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(elapsed * 8));
+        gotoFrame.traverse(child => {
+          if (child.isMesh && child.material) child.material.opacity = opacity;
+        });
+        if (elapsed > 3) {
+          gotoFrame.parent.remove(gotoFrame);
+          gotoFrame = null;
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // 射线点击
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let pointerDownPos = null;
+
+    function findCalendarHit() {
+      const intersects = raycaster.intersectObjects(calendarObjects.children, true);
+      const found = intersects.find(i => {
+        let obj = i.object;
+        while (obj && obj !== calendarObjects) {
+          if (obj.userData.dateKey) return true;
+          obj = obj.parent;
+        }
+        return false;
+      });
+      if (!found) return null;
+      let obj = found.object;
+      while (obj && !obj.userData.dateKey) obj = obj.parent;
+      return obj;
+    }
+
+    window.addEventListener('pointermove', e => {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      document.body.style.cursor = findCalendarHit() ? 'pointer' : '';
+    });
+
+    window.addEventListener('pointerdown', e => { pointerDownPos = { x: e.clientX, y: e.clientY }; });
+
+    window.addEventListener('pointerup', e => {
+      if (!pointerDownPos) return;
+      if (document.querySelector('.modal-backdrop.active')) return;
+      const dx = e.clientX - pointerDownPos.x;
+      const dy = e.clientY - pointerDownPos.y;
+      pointerDownPos = null;
+      if (Math.sqrt(dx * dx + dy * dy) > 6) return;
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const obj = findCalendarHit();
+      if (obj && obj.userData.isCurrentMonth !== false) {
+        selectedDateKey = obj.userData.dateKey;
+        showDateDetail(selectedDateKey);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const aspect = window.innerWidth / window.innerHeight;
+      camera.left = -frustumSize * aspect / 2;
+      camera.right = frustumSize * aspect / 2;
+      camera.top = frustumSize / 2;
+      camera.bottom = -frustumSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    } else {
+      document.getElementById('hint').textContent = '当前环境不支持 WebGL，3D 花园无法渲染，但记录与计划功能仍可正常使用。';
+    }
+
+    // ============ UI 逻辑 ============
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function openModal(id) {
+      document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById(btn.dataset.close).classList.remove('active');
+      });
+    });
+
+    // 月份切换
+    document.getElementById('prev-month').addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar(currentYear, currentMonth);
+    });
+    document.getElementById('next-month').addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar(currentYear, currentMonth);
+    });
+
+    // 用户登录提示
+    document.getElementById('user-login').addEventListener('click', () => {
+      alert('用户数据模块正在开发中');
+    });
+
+    // 记录情绪
+    document.getElementById('btn-emotion').addEventListener('click', () => {
+      document.getElementById('emotion-date').value = todayKey;
+      openModal('modal-emotion');
+    });
+
+    document.querySelectorAll('.emotion-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.emotion-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        document.getElementById('emotion-score').value = opt.dataset.score;
+      });
+    });
+    document.querySelector('.emotion-option[data-score="2"]').classList.add('selected');
+
+    document.getElementById('save-emotion').addEventListener('click', () => {
+      const date = document.getElementById('emotion-date').value;
+      const score = parseInt(document.getElementById('emotion-score').value);
+      const note = document.getElementById('emotion-note').value.trim();
+      if (!date) return;
+      if (isDateOccupied(date)) {
+        alert('一天只能添加一个情绪事件哦');
+        return;
+      }
+
+      saveEmotion(date, score, note);
+
+      document.getElementById('modal-emotion').classList.remove('active');
+      document.getElementById('emotion-note').value = '';
+      showToast('情绪已记录，花园里多了一朵花');
+      renderStats();
+
+      const [y, m] = date.split('-').map(Number);
+      if (y === currentYear && m - 1 === currentMonth) renderCalendar(currentYear, currentMonth);
+    });
+
+    // 种颗种子
+    document.getElementById('btn-plan').addEventListener('click', () => {
+      document.getElementById('plan-date').value = todayKey;
+      openModal('modal-plan');
+    });
+
+    document.getElementById('save-plan').addEventListener('click', () => {
+      const date = document.getElementById('plan-date').value;
+      const title = document.getElementById('plan-title').value.trim();
+      if (!date || !title) return;
+      if (isDateOccupied(date)) {
+        alert('一天只能添加一个情绪事件哦');
+        return;
+      }
+
+      savePlan(date, title);
+
+      document.getElementById('modal-plan').classList.remove('active');
+      document.getElementById('plan-title').value = '';
+      showToast('种子已种下，期待它发芽');
+      renderSeedList();
+      renderStats();
+
+      const [y, m] = date.split('-').map(Number);
+      if (y === currentYear && m - 1 === currentMonth) renderCalendar(currentYear, currentMonth);
+    });
+
+    // 日期详情
+    function showDateDetail(key) {
+      const date = new Date(key + 'T00:00:00');
+      document.getElementById('detail-title').textContent =
+        `${date.getMonth() + 1}月${date.getDate()}日`;
+      const content = document.getElementById('detail-content');
+      const data = getDateData(key);
+
+      const emotionEmojis = {
+        '-1': '😔', '1': '😕', '2': '🙂', '3': '😊', '4': '🤩'
+      };
+      const emotionLabels = {
+        '-1': '低落', '1': '一般', '2': '平和', '3': '开心', '4': '很棒'
+      };
+
+      let html = '';
+      if (data && data.emotion) {
+        html += `<div class="record-item"><strong>情绪记录</strong><div>心情：${emotionEmojis[data.emotion]} ${emotionLabels[data.emotion]}（${data.emotion}）</div>${data.note ? `<small>${data.note}</small>` : ''}</div>`;
+      }
+      if (data && data.plan) {
+        html += `<div class="record-item"><strong>计划：${data.plan.title}</strong><div>成长值：${data.plan.growth}/${PLAN_THRESHOLD}</div>`;
+        if (data.plan.records.length) {
+          html += `<small>${data.plan.records.map(r => `· ${r}`).join('<br>')}</small>`;
+        }
+        html += `</div>`;
+      }
+      if (!html) html = '<p style="color:var(--text-muted);font-size:14px;">这一天还没有记录，去种点什么吧～</p>';
+      content.innerHTML = html;
+
+      const planActions = document.getElementById('plan-actions');
+      const addRecordBtn = document.getElementById('add-record');
+      if (data && data.plan && data.plan.growth < PLAN_THRESHOLD) {
+        planActions.style.display = 'block';
+        addRecordBtn.onclick = () => {
+          const note = document.getElementById('record-input').value.trim();
+          const newGrowth = addPlanRecord(key, note);
+          document.getElementById('record-input').value = '';
+          showToast('计划成长值 +1');
+          showDateDetail(key);
+          renderCalendar(currentYear, currentMonth);
+          renderSeedList();
+          renderStats();
+          if (newGrowth >= PLAN_THRESHOLD) {
+            showToast('种子开花了！');
+          }
+        };
+      } else {
+        planActions.style.display = 'none';
+      }
+
+      const clearBtn = document.getElementById('clear-detail');
+      if (data && (data.emotion || data.plan)) {
+        clearBtn.style.display = 'inline-flex';
+        clearBtn.onclick = () => {
+          if (confirm('确定要清除这一天的所有记录吗？')) {
+            clearDateData(key);
+            closeModal('modal-detail');
+            showToast('已清除记录');
+            renderCalendar(currentYear, currentMonth);
+            renderSeedList();
+            renderStats();
+          }
+        };
+      } else {
+        clearBtn.style.display = 'none';
+        clearBtn.onclick = null;
+      }
+
+      openModal('modal-detail');
+    }
+    openDateDetail = showDateDetail;
+
+    // 来点灵感
+    const randomTasks = [
+      '下周末去公园野餐',
+      '这个月读完一本想读的书',
+      '本周学会一道新菜',
+      '月底之前整理一次房间',
+      '下个月初去一次美术馆',
+      '这周内每天早睡半小时',
+      '周末和朋友约一顿火锅',
+      '本月尝试一项新运动',
+      '年底前存下一个小目标',
+      '下周每天散步 20 分钟',
+      '这个月给远方的朋友写封信',
+      '周末去郊外观星或看日出'
+    ];
+    let selectedInspirationTask = null;
+
+    function renderRandomTasks() {
+      const board = document.getElementById('bulletin-board');
+      board.innerHTML = '';
+      const shuffled = [...randomTasks].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 6);
+      const pinColors = ['#FF6B6B', '#FFD166', '#06D6A0', '#A8C5E8', '#C6A8E6', '#F4A261'];
+
+      selected.forEach((task, index) => {
+        const card = document.createElement('div');
+        card.className = 'bulletin-card';
+        const tilt = (Math.random() - 0.5) * 6;
+        card.style.setProperty('--tilt', `${tilt}deg`);
+
+        const pinColor = pinColors[index % pinColors.length];
+        card.innerHTML = `
+          <div class="bulletin-pin" style="background: radial-gradient(circle at 30% 30%, ${pinColor}, #C92A2A);"></div>
+          <div class="bulletin-card-text">${escapeHtml(task)}</div>
+        `;
+
+        card.addEventListener('click', e => {
+          e.stopPropagation();
+          selectedInspirationTask = task;
+          document.getElementById('inspiration-task-title').textContent = task;
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const dateInput = document.getElementById('inspiration-date');
+          dateInput.value = formatDate(tomorrow);
+          dateInput.min = formatDate(today);
+          document.getElementById('modal-inspiration-confirm').classList.add('active');
+        });
+
+        board.appendChild(card);
+      });
+    }
+
+    document.getElementById('btn-random').addEventListener('click', () => {
+      renderRandomTasks();
+      openModal('modal-random');
+    });
+    document.getElementById('draw-task').addEventListener('click', () => {
+      renderRandomTasks();
+    });
+
+    document.getElementById('save-inspiration').addEventListener('click', () => {
+      const date = document.getElementById('inspiration-date').value;
+      if (!date || !selectedInspirationTask) return;
+      if (isDateOccupied(date)) {
+        alert('一天只能添加一个情绪事件哦');
+        return;
+      }
+      savePlan(date, selectedInspirationTask);
+      showToast('灵感种子已种下');
+      closeModal('modal-inspiration-confirm');
+      closeModal('modal-random');
+      renderSeedList();
+      renderStats();
+      const [y, m] = date.split('-').map(Number);
+      if (y === currentYear && m - 1 === currentMonth) renderCalendar(currentYear, currentMonth);
+    });
+
+    // 情绪周报
+    document.getElementById('btn-report').addEventListener('click', () => {
+      const chart = document.getElementById('report-chart');
+      const summary = document.getElementById('report-summary');
+      chart.innerHTML = '';
+
+      const entries = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const key = formatDate(d);
+        const data = getDateData(key);
+        entries.push({
+          dayLabel: `${d.getMonth() + 1}/${d.getDate()}`,
+          date: key,
+          score: data && data.emotion ? data.emotion : 0,
+          note: data && data.note ? data.note : ''
+        });
+      }
+
+      const scores = entries.map(e => e.score);
+      const recorded = entries.filter(e => e.score !== 0);
+      const maxAbsScore = Math.max(...scores.map(Math.abs), 4);
+      const avg = recorded.length ? recorded.reduce((a, b) => a + b.score, 0) / recorded.length : 0;
+
+      const emojis = {
+        '-1': '😔', '1': '😕', '2': '🙂', '3': '😊', '4': '🤩'
+      };
+      const labels = {
+        '-1': '低落', '1': '一般', '2': '平和', '3': '开心', '4': '很棒'
+      };
+      const colors = {
+        '-1': '#64B5F6', '1': '#90CAF9', '2': '#B8D4A8', '3': '#F0C674', '4': '#E6A8C6'
+      };
+
+      // 渲染柱状图（空记录显示浅色底柱）
+      entries.forEach(entry => {
+        const wrap = document.createElement('div');
+        wrap.className = 'bar-wrap';
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const targetH = entry.score !== 0 ? Math.max(8, (Math.abs(entry.score) / maxAbsScore) * 100) : 6;
+        bar.style.height = `${targetH}%`;
+        bar.style.background = entry.score !== 0
+          ? (entry.score < 0
+            ? `linear-gradient(180deg, ${colors[entry.score]} 0%, #1E88E5 100%)`
+            : `linear-gradient(180deg, ${colors[entry.score]} 0%, #FF8A80 100%)`)
+          : '#E8E4DC';
+        const label = document.createElement('div');
+        label.className = 'bar-label';
+        label.textContent = entry.dayLabel;
+        wrap.appendChild(bar);
+        wrap.appendChild(label);
+        chart.appendChild(wrap);
+      });
+
+      // 分布统计
+      const distribution = [-1, 1, 2, 3, 4].map(s => ({
+        score: s,
+        count: recorded.filter(e => e.score === s).length
+      })).filter(d => d.count > 0);
+
+      const distributionHtml = distribution.length
+        ? `<div style="margin:14px 0;display:flex;gap:8px;flex-wrap:wrap;">` +
+            distribution.map(d =>
+              `<span style="background:${colors[d.score]}22;border:var(--border-width) solid ${colors[d.score]}66;color:var(--text-heading);padding:4px 10px;border-radius:var(--radius-md);font-size:12px;">${emojis[d.score]} ${labels[d.score]} ×${d.count}</span>`
+            ).join('') +
+          `</div>`
+        : '';
+
+      // 高光 / 低谷日（最高分最正为高光，最低分最负为低谷）
+      const sorted = [...recorded].sort((a, b) => b.score - a.score);
+      const best = sorted[0];
+      const worst = sorted[sorted.length - 1];
+
+      const bestHtml = best
+        ? `<div class="record-item"><strong>🌟 本周高光</strong><div>${best.date} · ${emojis[best.score]} ${labels[best.score]}（${best.score}）</div>${best.note ? `<small>${best.note}</small>` : ''}</div>`
+        : '';
+      const worstHtml = worst && (!best || worst.date !== best.date)
+        ? `<div class="record-item"><strong>🌧 本周低谷</strong><div>${worst.date} · ${emojis[worst.score]} ${labels[worst.score]}（${worst.score}）</div>${worst.note ? `<small>${worst.note}</small>` : ''}</div>`
+        : '';
+
+      // 计划进度
+      const weekPlanDates = entries.map(e => e.date);
+      let activePlans = 0;
+      let completedPlans = 0;
+      let totalRecords = 0;
+      weekPlanDates.forEach(key => {
+        const data = getDateData(key);
+        if (data && data.plan) {
+          activePlans++;
+          totalRecords += data.plan.records.length;
+          if (data.plan.growth >= PLAN_THRESHOLD) completedPlans++;
+        }
+      });
+      const planHtml = activePlans > 0
+        ? `<div class="record-item"><strong>🌱 计划进展</strong><div>本周 ${activePlans} 个计划 · 已完成 ${completedPlans} 个 · 共记录 ${totalRecords} 次行动</div></div>`
+        : '';
+
+      // 情绪关键词
+      let keyword = '静待花开';
+      if (avg >= 3.5) keyword = '阳光灿烂';
+      else if (avg >= 2.5) keyword = '温暖向好';
+      else if (avg >= 1) keyword = '平稳安然';
+      else if (avg > -1) keyword = '温柔疗愈';
+
+      let moodText = '';
+      if (avg >= 3) moodText = '过去一周你的心情整体很明亮，继续保持这份能量吧。';
+      else if (avg >= 1) moodText = '过去一周情绪比较平稳，记得多给自己一些小奖励。';
+      else if (avg > -1) moodText = '过去一周有些起伏，没关系，慢慢来，花园需要时间。';
+      else moodText = '过去一周还没有情绪记录，试着每天种下一朵花吧。';
+
+      summary.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;">
+          <div style="font-size:28px;">${keyword}</div>
+          <div style="font-size:13px;color:var(--text-color);">平均情绪值 <strong>${avg.toFixed(1)}</strong><br>记录天数 <strong>${recorded.length}</strong>/7</div>
+        </div>
+        ${distributionHtml}
+        <p>${moodText}</p>
+        ${bestHtml}
+        ${worstHtml}
+        ${planHtml}
+      `;
+      openModal('modal-report');
+    });
+
+    // ============ 氛围系统 ============
+
+    // 音频
+    const rainAudio = new Audio('sound/rain.mp3');
+    rainAudio.loop = true;
+    rainAudio.volume = 0.35;
+
+    const nightAudio = new Audio('sound/night.mp3');
+    nightAudio.loop = true;
+    nightAudio.volume = 0.35;
+
+    function startRainAudio() {
+      rainAudio.currentTime = 0;
+      rainAudio.play().catch(() => {});
+    }
+
+    function stopRainAudio() {
+      rainAudio.pause();
+    }
+
+    function startNightAudio() {
+      nightAudio.currentTime = 0;
+      nightAudio.play().catch(() => {});
+    }
+
+    function stopNightAudio() {
+      nightAudio.pause();
+    }
+
+    // 雨幕动画
+    const rainCanvas = document.getElementById('rain-canvas');
+    const rainCtx = rainCanvas.getContext('2d');
+    let raindrops = [];
+    let ripples = [];
+    let rainAnimationId = null;
+
+    function resizeRainCanvas() {
+      rainCanvas.width = window.innerWidth;
+      rainCanvas.height = window.innerHeight;
+    }
+
+    function createRaindrop() {
+      return {
+        x: Math.random() * rainCanvas.width,
+        y: -40 - Math.random() * 60,
+        speed: 16 + Math.random() * 12,
+        length: 18 + Math.random() * 14,
+        opacity: 0.45 + Math.random() * 0.35
+      };
+    }
+
+    function startRainAnimation() {
+      if (rainAnimationId) return;
+      resizeRainCanvas();
+      raindrops = Array.from({ length: 220 }, createRaindrop);
+      function animateRain() {
+        rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+        raindrops.forEach(drop => {
+          const grad = rainCtx.createLinearGradient(drop.x, drop.y, drop.x - 3, drop.y + drop.length);
+          grad.addColorStop(0, `rgba(255, 255, 255, 0)`);
+          grad.addColorStop(0.5, `rgba(235, 240, 255, ${drop.opacity})`);
+          grad.addColorStop(1, `rgba(220, 230, 255, 0)`);
+          rainCtx.strokeStyle = grad;
+          rainCtx.lineWidth = 1.6;
+          rainCtx.globalAlpha = 1;
+          rainCtx.beginPath();
+          rainCtx.moveTo(drop.x, drop.y);
+          rainCtx.lineTo(drop.x - 3, drop.y + drop.length);
+          rainCtx.stroke();
+          drop.y += drop.speed;
+          drop.x -= 0.7;
+          if (drop.y > rainCanvas.height) {
+            if (Math.random() < 0.18) {
+              const minY = rainCanvas.height * 0.45;
+              ripples.push({
+                x: Math.random() * rainCanvas.width,
+                y: minY + Math.random() * (rainCanvas.height - minY),
+                rx: 2,
+                ry: 0.8,
+                opacity: 0.5
+              });
+            }
+            Object.assign(drop, createRaindrop());
+          }
+        });
+        rainCtx.globalAlpha = 1;
+        ripples = ripples.filter(r => r.opacity > 0);
+        ripples.forEach(r => {
+          rainCtx.beginPath();
+          rainCtx.ellipse(r.x, r.y, r.rx, r.ry, 0, 0, Math.PI * 2);
+          rainCtx.strokeStyle = `rgba(215, 225, 245, ${r.opacity})`;
+          rainCtx.lineWidth = 1.2;
+          rainCtx.stroke();
+          r.rx += 1.1;
+          r.ry += 0.38;
+          r.opacity -= 0.011;
+        });
+        rainAnimationId = requestAnimationFrame(animateRain);
+      }
+      rainAnimationId = requestAnimationFrame(animateRain);
+    }
+
+    function stopRainAnimation() {
+      if (rainAnimationId) {
+        cancelAnimationFrame(rainAnimationId);
+        rainAnimationId = null;
+      }
+      rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+      raindrops = [];
+      ripples = [];
+    }
+
+    window.addEventListener('resize', () => {
+      resizeRainCanvas();
+    });
+
+    function createGradientTexture(topHex, bottomHex) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 2;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      const topColor = new THREE.Color(topHex).getStyle();
+      const bottomColor = new THREE.Color(bottomHex).getStyle();
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, topColor);
+      grad.addColorStop(1, bottomColor);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.needsUpdate = true;
+      return tex;
+    }
+
+    const rainGradientTexture = createGradientTexture(PLANT_CONFIG.rain.bgTop, PLANT_CONFIG.rain.bgBottom);
+
+    const atmosphereConfigs = {
+      day: {
+        sceneBg: 0xEAE7DF,
+        fog: 0xEAE7DF,
+        dirLight: 1.0,
+        ambientLight: 0.9,
+        groundBase: 0xF5F1E8,
+        groundShadow: 0x2C2C2C
+      },
+      rain: {
+        sceneBg: null,
+        fog: PLANT_CONFIG.rain.bgBottom,
+        dirLight: 0.7,
+        ambientLight: 0.8,
+        groundBase: PLANT_CONFIG.rain.calendarGround,
+        groundShadow: 0x3A3A3A
+      },
+      night: {
+        sceneBg: 0x1A1A1F,
+        fog: 0x1A1A1F,
+        dirLight: 0.35,
+        ambientLight: 0.4,
+        groundBase: 0x25252B,
+        groundShadow: 0x000000
+      }
+    };
+
+    function setAtmosphere(mode) {
+      currentAtmosphere = mode;
+      const cfg = atmosphereConfigs[mode];
+      if (!cfg || !scene) return;
+
+      document.body.classList.remove('mode-day', 'mode-rain', 'mode-night');
+      document.body.classList.add(`mode-${mode}`);
+
+      document.querySelectorAll('.atmosphere-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+
+      if (mode === 'rain') {
+        scene.background = rainGradientTexture;
+      } else {
+        scene.background = new THREE.Color(cfg.sceneBg);
+      }
+      scene.fog.color.set(cfg.fog);
+      dirLight.intensity = cfg.dirLight;
+      ambientLight.intensity = cfg.ambientLight;
+      groundBase.material.color.set(cfg.groundBase);
+      groundShadow.material.color.set(cfg.groundShadow);
+
+      if (mode === 'rain') {
+        stopNightAudio();
+        if (fireflyGroup) fireflyGroup.visible = false;
+        startRainAudio();
+        startRainAnimation();
+      } else if (mode === 'night') {
+        stopRainAudio();
+        stopRainAnimation();
+        startNightAudio();
+        if (fireflyGroup) fireflyGroup.visible = true;
+      } else {
+        stopRainAudio();
+        stopRainAnimation();
+        stopNightAudio();
+        if (fireflyGroup) fireflyGroup.visible = false;
+      }
+
+      renderCalendar(currentYear, currentMonth);
+    }
+
+    document.querySelectorAll('.atmosphere-btn').forEach(btn => {
+      btn.addEventListener('click', () => setAtmosphere(btn.dataset.mode));
+    });
+
+    // 初始化
+    await initPersistence();
+    renderCalendar(currentYear, currentMonth);
+    renderSeedList();
+    renderStats();
+    if (webglAvailable) setAtmosphere('day');
+  </script>
+</body>
+</html>
